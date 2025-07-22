@@ -59,5 +59,20 @@ docker compose build
 5. **Running Tests:**
 
 ```bash
-    docker compose exec web python manage.py test
+    docker compose exec web python manage.py test transactions
+```
+
+6. **Clean transactions upload from API:**
+
+```bash
+docker exec -it test001-web-1 python manage.py shell
+```
+
+```bash
+from transactions.models import Transaction
+Transaction.objects.all().delete()
+```
+
+```bash
+exit()
 ```
