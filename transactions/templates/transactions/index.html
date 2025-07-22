@@ -1,0 +1,190 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transaction Tracker - Ledgerly</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="{% static 'transactions/css/transactions.css' %}"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container-fluid my-4 px-3 py-4">
+      <header class="bg-light py-3 px-3 mb-4">
+        <div
+          class="container-fluid d-flex justify-content-between align-items-center flex-wrap gap-2"
+        >
+          <p class="mb-0">Transaction Tracker</p>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <button
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#addTransactionModal"
+            >
+              Add Transaction
+            </button>
+            <button
+              id="loadApiTransactionsBtn"
+              class="btn btn-secondary"
+              data-import-url="{% url 'import_transactions' %}"
+            >
+              Load Transactions
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div id="total-balance-display" class="text-start text-muted">
+        Total Balance:
+        <span id="total-balance">${{ total_balance|floatformat:2 }}</span>
+      </div>
+
+      <div class="row mb-3 align-items-end">
+        <div class="col-md-4 col-sm-6 mb-2">
+          <label for="filterType" class="form-label">Filter by Type</label>
+          <select class="form-select" id="filterType">
+            <option value="">All Types</option>
+            <option value="deposit">Deposit</option>
+            <option value="expense">Expense</option>
+          </select>
+        </div>
+        <div class="col-md-auto col-sm-6 mb-2">
+          <button id="applyFiltersBtn" class="btn btn-outline-secondary w-100">
+            Apply Filters
+          </button>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Running Balance</th>
+            </tr>
+          </thead>
+          <tbody id="transaction-table-body">
+            {% if page_obj.object_list %} {% for t in page_obj.object_list %}
+            <tr>
+              <td>{{ t.code|default_if_none:"N/A" }}</td>
+              <td>{{ t.created_at|date:"d/m/Y H:i" }}</td>
+              <td class="{{ t.type }}">{{ t.get_type_display }}</td>
+              <td>
+                <span class="{{ t.type }}">
+                  {% if t.amount > 0 %}+{% endif %}{{ t.amount|floatformat:2 }}
+                </span>
+              </td>
+              <td>{{ t.running_balance|floatformat:2 }}</td>
+            </tr>
+            {% endfor %} {% else %}
+            <tr id="no-transactions-row">
+              <td colspan="5" class="text-center">No transactions yet.</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="text-center">
+        {% if page_obj.has_next %}
+        <button
+          id="loadMoreBtn"
+          class="btn btn-info mt-3"
+          data-next-page="{{ page_obj.next_page_number }}"
+          data-list-url="{% url 'transaction_list' %}"
+        >
+          Load More
+        </button>
+        {% else %}
+        <button
+          id="loadMoreBtn"
+          class="btn btn-info mt-3"
+          disabled
+          style="display: none"
+          data-list-url="{% url 'transaction_list' %}"
+        >
+          No More Transactions
+        </button>
+        {% endif %}
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="addTransactionModal"
+      tabindex="-1"
+      aria-labelledby="addTransactionModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <form
+          id="addTransactionForm"
+          class="modal-content"
+          data-add-url="{% url 'add_transaction' %}"
+        >
+          <div class="modal-header">
+            <h5 class="modal-title" id="addTransactionModalLabel">
+              Add Transaction
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div
+              id="formError"
+              class="alert alert-danger d-none"
+              role="alert"
+            ></div>
+            <div class="mb-3">
+              <label for="typeSelect" class="form-label">Type</label>
+              <select id="typeSelect" name="type" class="form-select" required>
+                <option value="" disabled selected>Select type</option>
+                <option value="deposit">Deposit</option>
+                <option value="expense">Expense</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="amountInput" class="form-label">Amount</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                class="form-control"
+                id="amountInput"
+                name="amount"
+                required
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Discard
+            </button>
+            <button type="submit" class="btn btn-primary">Add</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'transactions/js/main.js' %}"></script>
+  </body>
+</html>
