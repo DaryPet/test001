@@ -130,6 +130,8 @@
           class="modal-content"
           data-add-url="{% url 'add_transaction' %}"
         >
+          {% csrf_token %}
+
           <div class="modal-header">
             <h5 class="modal-title" id="addTransactionModalLabel">
               Add Transaction
@@ -148,25 +150,11 @@
               role="alert"
             ></div>
             <div class="mb-3">
-              <label for="typeSelect" class="form-label">Type</label>
-              <select id="typeSelect" name="type" class="form-select" required>
-                <option value="" disabled selected>Select type</option>
-                <option value="deposit">Deposit</option>
-                <option value="expense">Expense</option>
-              </select>
+              {{form.type.label_tag}} {{form.type}} {% if form.type.errors %}
+              <div class="text-danger small">{{form.type.errors}}</div>
+              {%endif%}
             </div>
-            <div class="mb-3">
-              <label for="amountInput" class="form-label">Amount</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0.01"
-                class="form-control"
-                id="amountInput"
-                name="amount"
-                required
-              />
-            </div>
+            <div class="mb-3">{{form.amount.label_tag}} {{form.amount}}</div>
           </div>
           <div class="modal-footer">
             <button
@@ -181,7 +169,6 @@
         </form>
       </div>
     </div>
-
     <div class="toast-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

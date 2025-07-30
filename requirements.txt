@@ -3,3 +3,5 @@ psycopg2-binary
 dj-database-url
 requests
 pylint
+django-model-utils==4.3.1
+setuptools
